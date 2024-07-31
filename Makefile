@@ -21,6 +21,10 @@ dist:
 	: ## $@
 	mkdir -p $@ $@/bin
 
+	cp -f assets/k3d_$(shell uname -s)_$(shell uname -m) $@/bin/k3d
+	chmod 0500 $@/bin/*
+
+
 build:
 	: ## $@
 
@@ -30,5 +34,22 @@ check:
 ## ad hoc #######################################
 assets: assets.yaml
 	: ## $@
+	mkdir -p $@
 
+	# iterate assets.yaml and install any missing assets
+	<$< yq  -re 'to_entries[] | "\(.key) \(.value)"' \
+		| xargs -rn2 -- sh -c 'test -f $$1 || echo $$1 $$2' _ \
+		| xargs -rn2 -- sh -c '
+			dirname $$1 | xargs mkdir -vp
+			curl "$$2" \
+				-s \
+		    -L \
+		    -D/dev/stderr \
+				-o $$1' _
+
+	# sanity check assets correctly installed
+	<$< yq -re 'keys[]' \
+		| xargs -I% -- sh -xc \
+			'test -f % && stat %
+			' _	
 	
