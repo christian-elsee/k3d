@@ -6,12 +6,14 @@
 ## env ##########################################
 export NAME := $(shell basename $(PWD))
 export PATH := dist/bin:$(PATH)
+export KUBECONFIG := dist/kubeconfig
 export CLUSTER := lab1
 
 ## interface ####################################
-all: distclean dist build check
+all: distclean dist check
 install:
 init: assets	
+clean: delete distclean
 
 ## workflow #####################################
 distclean:
@@ -26,16 +28,26 @@ dist:
 	cp -f assets/k3d_$(shell uname -s)_$(shell uname -m) $@/bin/k3d
 	chmod 0500 $@/bin/*
 
-build:
+check: config.yaml
 	: ## $@
+	k3d config migrate "$<" "dist/$<"
+
+install: config.yaml
+	: ## $@
+	k3d cluster create \
+		--config $< \
+		--verbose
+	<$< yq -re ".name" \
+		| xargs k3d kubeconfig write \
+				-o dist/kubeconfig
+	kubectl cluster-info dump \
+		| tee dist/cluster-info
 
 
-check: 
+delete: config.yaml
 	: ## $@
-
-install: dist/config.yaml
-	: ## $@
-	k3d cluster create --config $<
+	<$< yq -re ".name" \
+		| xargs k3d cluster delete
 
 ## ad hoc #######################################
 assets: assets.yaml
