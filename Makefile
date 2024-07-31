@@ -6,6 +6,7 @@
 ## env ##########################################
 export NAME := $(shell basename $(PWD))
 export PATH := dist/bin:$(PATH)
+export CLUSTER := lab1
 
 ## interface ####################################
 all: distclean dist build check
@@ -21,15 +22,20 @@ dist:
 	: ## $@
 	mkdir -p $@ $@/bin
 
+	cp config.yaml $@
 	cp -f assets/k3d_$(shell uname -s)_$(shell uname -m) $@/bin/k3d
 	chmod 0500 $@/bin/*
-
 
 build:
 	: ## $@
 
+
 check: 
 	: ## $@
+
+install: dist/config.yaml
+	: ## $@
+	k3d cluster create --config $<
 
 ## ad hoc #######################################
 assets: assets.yaml

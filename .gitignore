@@ -3,3 +3,4 @@
 !.gitignore
 !Makefile
 !assets.yaml
+!config.yaml.env
