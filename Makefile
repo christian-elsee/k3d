@@ -67,9 +67,11 @@ delete: config.yaml
 		| xargs k3d cluster delete
 
 ## ad hoc #######################################
-assets: assets.yaml
+assets: assets/.touch 
+assets/.touch: assets.yaml
 	: ## $@
-	mkdir -p $@
+	dirname $@ | xargs mkdir -p
+	touch   $@
 
 	# iterate assets.yaml and install any missing assets
 	<$< yq  -re 'to_entries[] | "\(.key) \(.value)"' \

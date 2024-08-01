@@ -11,27 +11,15 @@ A kubernetes k3d orchestration workflow.
 
 ## Requirements
 
-A list of development environment dependencies.  is always the expected default.  
+A list of development environment dependencies.  
 
-- [GNU core utils](https://en.wikipedia.org/wiki/List_of_GNU_Core_Utilities_commands), 9.5
+- [GNU coreutils](https://en.wikipedia.org/wiki/List_of_GNU_Core_Utilities_commands), 9.5
 ```sh
 $ brew info coreutils
 ==> coreutils: stable 9.5, HEAD
 GNU File, Shell, and Text utilities
 https://www.gnu.org/software/coreutils
 ...
-```
-
-- aws, aws-cli/2.15.47
-```sh
-$ aws --version
-aws-cli/2.15.47 Python/3.11.8 Darwin/17.7.0 exe/x86_64 prompt/off
-```
-
-- prove,v3.42
-```sh
-$ prove --version
-TAP::Harness v3.42 and Perl v5.30.3
 ```
 
 - make, GNU Make 4.4.1
@@ -42,30 +30,15 @@ GNU Make 4.4.1
 
 ## Setup
 
-The preliminary steps required to run orchestration workflow. Setup should only be done once.
-
-1\. Install assets. *
+Idempotent setup of preliminary dependencies. 
 
 ```sh
-$ make assets
+$ make init
 : ## assets
 mkdir -p assets
-<assets.yaml yq -re -re 'to_entries[] | "\(.key) \(.value)"' \
-  | xargs -rn2 -- sh -c 'test -f $1 || echo $1 $2' _ \
-  | xargs -rn2 -- sh -c '
+# iterate assets.yaml and install any missing assets
 ...
-+ stat src/tap.sh
-  File: src/tap.sh
-  Size: 650         Blocks: 8          IO Block: 4096   regular file
-Device: 1,4 Inode: 20504210    Links: 1
-Access: (0644/-rw-r--r--)  Uid: (  501/christian)   Gid: (   20/   staff)
-Access: 2024-06-24 18:02:30.340002610 +0200
-Modify: 2024-06-24 18:02:29.172024758 +0200
-Change: 2024-06-24 18:02:29.172024758 +0200
- Birth: 2024-06-24 18:02:29.171845500 +0200
 ```
-\* Assets are defined in `assets.yaml` and should only be installed within repo context.
-
 
 ## Usage
 
