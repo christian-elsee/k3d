@@ -11,7 +11,7 @@ export CLUSTER := lab1
 
 ## interface ####################################
 all: distclean dist check
-install:
+install: install/cluster dist/kubeconfig
 init: assets	
 clean: delete distclean
 
@@ -30,23 +30,40 @@ dist:
 
 check: config.yaml
 	: ## $@
-	k3d config migrate "$<" "dist/$<"
+	# validate configuration using migrate command
+	k3d config migrate --trace "$<" \
+		| tee dist/config-migrate
 
-install: config.yaml
+install/cluster: config.yaml
 	: ## $@
+	# create cluster
 	k3d cluster create \
 		--config $< \
 		--verbose
-	<$< yq -re ".name" \
-		| xargs k3d kubeconfig write \
-				-o dist/kubeconfig
-	kubectl cluster-info dump \
-		| tee dist/cluster-info
 
+dist/kubeconfig: config.yaml
+	: ## $@		
+	# write kubeconfig to dist
+	<$< yq -re ".metadata.name" \
+		| xargs k3d kubeconfig write \
+				-o $@
+
+	# sanity check against kubectl
+	kubectl cluster-info \
+		--request-timeout="5s" \
+	| tee dist/cluster-info
+	kubectl cluster-info dump \
+		--request-timeout="5s" \
+	| tee dist/cluster-info-dump
+
+	# copy to "artifact ready" file postpended with md5sum hash
+	<$@ md5sum \
+		| cut -f1 -d" " \
+		| xargs -tI% cp $@ $@.%
 
 delete: config.yaml
 	: ## $@
-	<$< yq -re ".name" \
+	<$< yq -re ".metadata.name" \
 		| xargs k3d cluster delete
 
 ## ad hoc #######################################
