@@ -12,6 +12,7 @@ export CLUSTER := lab1
 ## interface ####################################
 all: distclean dist check
 install: install/cluster dist/kubeconfig
+kubeconfig: dist dist/kubeconfig
 init: assets	
 clean: delete distclean
 
