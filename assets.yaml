@@ -1,3 +1,4 @@
 ---
 assets/k3d_Darwin_x86_64: https://github.com/k3d-io/k3d/releases/download/v5.7.2/k3d-darwin-amd64
 assets/k3d_Linux_x86_64: https://github.com/k3d-io/k3d/releases/download/v5.7.2/k3d-linux-amd64
+assets/k3d_Darwin_arm64: https://github.com/k3d-io/k3d/releases/download/v5.7.2/k3d-darwin-arm64
